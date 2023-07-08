@@ -10,13 +10,14 @@
 #define CELL_W 20
 #define CELL_H 20
 #define RECT_UNDEF 0
-#define FIELD_W_CELLS 5
-#define FIELD_H_CELLS 10
+#define FIELD_W_CELLS 10
+#define FIELD_H_CELLS 20
 #define FIELD_W_PX FIELD_W_CELLS * CELL_W
 #define FIELD_H_PX FIELD_H_CELLS * CELL_H
 #define FPS 60
 #define FRAME_MS 1000 / FPS
 #define DAS_DELAY 10
+#define PIECE_CELLS 4
 
 #define true 1
 #define false 0
@@ -84,6 +85,71 @@ Uint32 top(SDL_Rect* rect) {
     return rect->y;
 }
 
+SDL_Rect* create_j_piece() {
+    SDL_Rect* ret_ptr = (SDL_Rect*) malloc(sizeof(SDL_Rect)*4);
+    ret_ptr[0].x = FIELD_W_CELLS / 2 * CELL_W + left(&playfield_rect);
+    ret_ptr[0].y = top(&playfield_rect);
+    ret_ptr[0].w = CELL_W;
+    ret_ptr[0].h = CELL_H;
+
+    ret_ptr[1].x = ret_ptr[0].x;
+    ret_ptr[1].y = ret_ptr[0].y + CELL_H;
+    ret_ptr[1].w = CELL_W;
+    ret_ptr[1].h = CELL_H;
+
+    ret_ptr[2].x = ret_ptr[1].x + CELL_W;
+    ret_ptr[2].y = ret_ptr[1].y;
+    ret_ptr[2].w = CELL_W;
+    ret_ptr[2].h = CELL_H;
+
+    ret_ptr[3].x = ret_ptr[2].x + CELL_W;
+    ret_ptr[3].y = ret_ptr[2].y;
+    ret_ptr[3].w = CELL_W;
+    ret_ptr[3].h = CELL_H;
+    
+    return ret_ptr;
+}
+
+Uint32 leftmost(SDL_Rect* rects, int count) {
+    Uint32 leftmost = INT_MAX;
+    for (int i = 0; i < count; i++) {
+        if (left(&rects[i]) < leftmost) {
+            leftmost = left(&rects[i]);
+        }
+    }
+    return leftmost;
+}
+
+Uint32 rightmost(SDL_Rect* rects, int count) {
+    Uint32 rightmost = 0;
+    for (int i = 0; i < count; i++) {
+        if (right(&rects[i]) > rightmost) {
+            rightmost = right(&rects[i]);
+        }
+    }
+    return rightmost;
+}
+
+Uint32 topmost(SDL_Rect* rects, int count) {
+    Uint32 topmost = 0;
+    for (int i = 0; i < count; i++) {
+        if (top(&rects[i]) > topmost) {
+            topmost = top(&rects[i]);
+        }
+    }
+    return topmost;
+}
+
+Uint32 bottomost(SDL_Rect* rects, int count) {
+    Uint32 bottomost = 0;
+    for (int i = 0; i < count; i++) {
+        if (bottom(&rects[i]) > bottomost) {
+            bottomost = bottom(&rects[i]);
+        }
+    }
+    return bottomost;
+}
+
 // attempts to move the piece along the X axis by mag. Will not move the piece
 // if it would place it outside of the playfield rect
 void move(SDL_Rect* piece, Uint32 mag) {
@@ -92,6 +158,26 @@ void move(SDL_Rect* piece, Uint32 mag) {
         && new_x + piece->w <= right(&playfield_rect))
     {
         piece->x = new_x;
+    }
+}
+
+void move_piece(SDL_Rect* piece, Uint32 mag) {
+    Uint32 new_left = leftmost(piece, PIECE_CELLS) + mag;
+    Uint32 new_right = rightmost(piece, PIECE_CELLS) + mag;
+    if (new_left >= left(&playfield_rect) && new_right <= right(&playfield_rect)) {
+        for (int i = 0; i < PIECE_CELLS; i++) {
+            piece[i].x += mag;
+        }
+    }
+}
+
+void drop_piece(SDL_Rect* piece, Uint32 mag) {
+    Uint32 new_top = topmost(piece, PIECE_CELLS) + mag;
+    Uint32 new_bottom = bottomost(piece, PIECE_CELLS) + mag;
+    if (new_top >= top(&playfield_rect) && new_bottom <= bottom(&playfield_rect)) {
+        for (int i = 0; i < PIECE_CELLS; i++) {
+            piece[i].y += mag;
+        }
     }
 }
 
@@ -130,12 +216,7 @@ int main() {
     center(&window_clip, &playfield_rect);
     SDL_Rect* playfield = outline_rect(&playfield_rect);
 
-    SDL_Rect current_piece = {
-        FIELD_W_CELLS / 2 * CELL_W + left(&playfield_rect),
-        top(&playfield_rect),
-        CELL_W,
-        CELL_H
-    };
+    SDL_Rect* current_piece = create_j_piece();
 
     Uint32 das_delay = 0;
     // End game initialization
@@ -144,6 +225,7 @@ int main() {
     Uint32 white = SDL_MapRGB(main_surface->format, 255, 255, 255);
     Uint32 red   = SDL_MapRGB(main_surface->format, 255, 0, 0);
     Uint32 black = SDL_MapRGB(main_surface->format, 0, 0, 0);
+    Uint32 blue  = SDL_MapRGB(main_surface->format, 0, 0, 255);
 
     const Uint8* keyboard_state = SDL_GetKeyboardState(NULL);
 
@@ -171,7 +253,7 @@ int main() {
 
         if (keyboard_state[SDL_SCANCODE_LEFT]) {
             if (das_delay == 0) {
-                move(&current_piece, -CELL_W);
+                move_piece(current_piece, -CELL_W);
                 das_delay = DAS_DELAY;
             }
             else {
@@ -180,7 +262,7 @@ int main() {
         }
         else if (keyboard_state[SDL_SCANCODE_RIGHT]) {
             if (das_delay == 0) {
-                move(&current_piece, CELL_W);
+                move_piece(current_piece, CELL_W);
                 das_delay = DAS_DELAY;
             }
             else {
@@ -195,12 +277,12 @@ int main() {
             g_counter += 1;
         if (g_counter >= gravity) {
             g_counter = 0;
-            current_piece.y += CELL_H;
+            drop_piece(current_piece, CELL_H);
         }
-        if (bottom(&current_piece) == bottom(&playfield_rect)) {
+        if (bottom(current_piece) == bottom(&playfield_rect)) {
             falling = false;
         }
-        SDL_FillRect(main_surface, &current_piece, red);
+        SDL_FillRects(main_surface, current_piece, PIECE_CELLS, blue);
         SDL_FillRects(main_surface, playfield, 4, white);
         SDL_UpdateWindowSurface(main_window);
 
@@ -211,6 +293,7 @@ int main() {
         SDL_Delay(FRAME_MS - time_since_start);
     }
 
+    free(current_piece);
     free(playfield);
     SDL_FreeSurface(main_surface);
     SDL_DestroyWindow(main_window);
