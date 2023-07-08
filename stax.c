@@ -10,8 +10,8 @@
 #define CELL_W 20
 #define CELL_H 20
 #define RECT_UNDEF 0
-#define FIELD_W_CELLS 10
-#define FIELD_H_CELLS 20
+#define FIELD_W_CELLS 5
+#define FIELD_H_CELLS 10
 #define FIELD_W_PX FIELD_W_CELLS * CELL_W
 #define FIELD_H_PX FIELD_H_CELLS * CELL_H
 #define FPS 60
@@ -20,9 +20,10 @@
 
 #define true 1
 #define false 0
-#define loop while(true)
+#define bool char
 
 Uint32 gravity = 48;
+bool falling = true;
 Uint32 g_counter = 0;
 
 SDL_Rect playfield_rect = {
@@ -148,23 +149,24 @@ int main() {
 
     // start game
     SDL_ShowWindow(main_window);
-    loop {
+    bool exit = false;
+    while(!exit) {
         Uint64 start_of_frame = SDL_GetTicks64();
         SDL_FillRect(main_surface, &window_clip, black);
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
                 case SDL_QUIT:
-                    goto exit;
+                    exit = true;
                 case SDL_KEYDOWN:
                     switch (event.key.keysym.sym) {
                         case SDLK_ESCAPE:
-                            goto exit;
+                            exit = true;
                     }
             }
         }
         if (keyboard_state[SDL_SCANCODE_LCTRL] && keyboard_state[SDL_SCANCODE_C]) {
-            goto exit;
+            exit = true;
         }
 
         if (keyboard_state[SDL_SCANCODE_LEFT]) {
@@ -189,23 +191,26 @@ int main() {
             das_delay = 0;
         }
 
-        g_counter += 1;
+        if (falling)
+            g_counter += 1;
         if (g_counter >= gravity) {
             g_counter = 0;
             current_piece.y += CELL_H;
         }
         if (bottom(&current_piece) == bottom(&playfield_rect)) {
-            gravity = INT_MAX;
+            falling = false;
         }
         SDL_FillRect(main_surface, &current_piece, red);
         SDL_FillRects(main_surface, playfield, 4, white);
         SDL_UpdateWindowSurface(main_window);
 
         Uint64 time_since_start = SDL_GetTicks64() - start_of_frame;
+        if (time_since_start > FRAME_MS) {
+            time_since_start = FRAME_MS;
+        }
         SDL_Delay(FRAME_MS - time_since_start);
     }
 
-exit:
     free(playfield);
     SDL_FreeSurface(main_surface);
     SDL_DestroyWindow(main_window);
