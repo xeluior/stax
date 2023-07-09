@@ -1,5 +1,7 @@
 #ifndef _PIECE_H
 #define _PIECE_H
+
+#include <SDL2/SDL_rect.h>
 #include "stax.h"
 
 typedef struct piece {

@@ -1,5 +1,6 @@
 #ifndef _SDL_EXT_H
 #define _SDL_EXT_H
+
 #include <SDL2/SDL_rect.h>
 
 // returns the the x or y value of the given side of the rect. O(c)

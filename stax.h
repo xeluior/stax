@@ -18,7 +18,7 @@
 #define FIELD_H_CELLS 20
 #define FIELD_W_PX FIELD_W_CELLS * CELL_W
 #define FIELD_H_PX FIELD_H_CELLS * CELL_H
-#define FPS 240
+#define FPS 60
 #define FRAME_MS 1000 / FPS
 #define DAS_DELAY 10
 #define PIECE_CELLS 4
