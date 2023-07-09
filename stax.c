@@ -2,15 +2,21 @@
 #include "SDL_ext.h"
 #include "board.h"
 
-// tries to drop the piece, returning true if it was dropped and false if the drop was blocked
-bool drop_piece(piece_t* piece, int mag, game_board* board);
-
 // creates a flat j piece in the middle-top of the board
 piece_t* create_j_piece(game_board* board, SDL_PixelFormat* format);
+
+// tries to move the piece by magnitude, returning true on sucess or false if
+// the piece would move out of the playing area or into another piece
+bool checked_move(piece_t* self, SDL_Point mag, game_board* playfield);
 
 int gravity = 16;
 int falling = true;
 int g_counter = 0;
+
+SDL_Point v_up = { 0, -CELL_H };
+SDL_Point v_down = { 0, CELL_H };
+SDL_Point v_left = { -CELL_W, 0 };
+SDL_Point v_right  = { CELL_W, 0 };
 
 int main() {
     // Begin SDL Boilerplate
@@ -84,7 +90,7 @@ int main() {
         // move the piece left || right
         if (keyboard_state[SDL_SCANCODE_LEFT]) {
             if (das_delay == 0) {
-                move_piece(current_piece, -CELL_W, board->rect);
+                checked_move(current_piece, v_left, board);
                 das_delay = DAS_DELAY;
             }
             else {
@@ -93,7 +99,7 @@ int main() {
         }
         else if (keyboard_state[SDL_SCANCODE_RIGHT]) {
             if (das_delay == 0) {
-                move_piece(current_piece, CELL_W, board->rect);
+                checked_move(current_piece, v_right, board);
                 das_delay = DAS_DELAY;
             }
             else {
@@ -114,7 +120,7 @@ int main() {
                 || (g_counter == gravity && keyboard_state[SDL_SCANCODE_DOWN])
             )
         {
-            if (!drop_piece(current_piece, CELL_H, board)) {
+            if (!checked_move(current_piece, v_down, board)) {
                 board->pieces[board->count++] = *current_piece;
                 free(current_piece);
                 if (board->count == MAX_PIECES) {
@@ -157,35 +163,6 @@ int main() {
     return 0;
 }
 
-bool drop_piece(piece_t* piece, int mag, game_board* board) {
-    // try drop piece
-    for (int i = 0; i < PIECE_CELLS; i++) {
-        piece->pips[i].y += mag;
-    }
-    int new_top = topmost(piece->pips, PIECE_CELLS);
-    int new_bottom = bottomost(piece->pips, PIECE_CELLS);
-
-    // check for collisions
-    int in_playfield = (new_top >= top(board->rect)) && (new_bottom <= bottom(board->rect));
-    int piece_collision = false;
-    for (int i = 0; i < board->count; i++) {
-        if (piece_intersect(piece, &board->pieces[i])) {
-            piece_collision = true;
-            break;
-        }
-    }
-
-    if (in_playfield && !piece_collision) {
-        return true;
-    }
-
-    // undo drop
-    for (int i = 0; i < PIECE_CELLS; i++) {
-        piece->pips[i].y -= mag;
-    }
-    return false;
-}
-
 piece_t* create_j_piece(game_board* board, SDL_PixelFormat* format) {
     piece_t* ret_ptr = (piece_t*) malloc(sizeof(piece_t));
     ret_ptr->color = SDL_MapRGB(format, 0, 0, 255);
@@ -210,5 +187,28 @@ piece_t* create_j_piece(game_board* board, SDL_PixelFormat* format) {
     ret_ptr->pips[3].h = CELL_H;
     
     return ret_ptr;
+}
+
+bool checked_move(piece_t* self, SDL_Point mag, game_board* playfield) {
+    // try move piece
+    move_piece(self, &mag);
+
+    // check for collisions
+    bool in_playfield = inside(self->pips, PIECE_CELLS, playfield->rect);
+    bool piece_collision = false;
+    for (int i = 0; i < playfield->count; i++) {
+        if (piece_intersect(self, &playfield->pieces[i])) {
+            piece_collision = true;
+            break;
+        }
+    }
+
+    // undo the move if nessecary
+    SDL_Point v_inverse = invert_point(mag);
+    if (piece_collision || !in_playfield) {
+        move_piece(self, &v_inverse);
+        return false;
+    }
+    return true;
 }
 

@@ -9,13 +9,12 @@ typedef struct piece {
     int color;
 } piece_t;
 
-// attempts to move the piece mag on the x axis binding it within the
-// playfield. O(n) n = PIECE_CELLS
-bool move_piece(piece_t* piece, int mag, SDL_Rect* playfield);
-
 // checks if piece_a has any pips that insersect with any pips of
 // piece_b. O(n^2) n = PIECE_CELLS
 bool piece_intersect(piece_t* piece_a, piece_t* piece_b);
+
+// modifies the postition of each pip of self by the offsets defined in vector
+void move_piece(piece_t* self, SDL_Point* vector);
 
 #endif
 

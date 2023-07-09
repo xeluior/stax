@@ -86,3 +86,15 @@ SDL_Rect* outline_rect(SDL_Rect* rect) {
     return ret_ptr;
 }
 
+bool inside(SDL_Rect* inners, int count, SDL_Rect* outer) {
+    return (leftmost(inners, count) >= left(outer))
+        && (rightmost(inners, count) <= right(outer))
+        && (topmost(inners, count) >= top(outer))
+        && (bottomost(inners, count) <= bottom(outer));
+}
+
+SDL_Point invert_point(SDL_Point point) {
+    SDL_Point ret = { -point.x, -point.y };
+    return ret;
+}
+

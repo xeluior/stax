@@ -2,6 +2,7 @@
 #define _SDL_EXT_H
 
 #include <SDL2/SDL_rect.h>
+#include <stdbool.h>
 
 // returns the the x or y value of the given side of the rect. O(c)
 int bottom(SDL_Rect* rect);
@@ -26,6 +27,14 @@ void center(SDL_Rect* parent, SDL_Rect* child);
 // the corners. The result should be freed when it is no longer needed.
 // O(c)
 SDL_Rect* outline_rect(SDL_Rect* rect);
+
+// returns true if the bounding box around the <count> rects in <inner> is
+// inside the boundary of <outer>, inclusive of the boundary. O(n) due to the
+// internal use of the *most functions.
+bool inside(SDL_Rect* inners, int count, SDL_Rect* outer);
+
+// swaps the sign on both parts of self and returns a pointer to itself
+SDL_Point invert_point(SDL_Point self);
 
 #endif
 
