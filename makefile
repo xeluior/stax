@@ -1,17 +1,30 @@
-CC := gcc
-CFLAGS := -I/usr/include/SDL2 -D_REENTRANT -lSDL2 -Wall
+SHELL = /bin/sh
+CC := clang
+SRC_DIR := src
+OBJ_DIR := build
+BIN_DIR := bin
+EXE := $(BIN_DIR)/stax
+SRC := $(wildcard $(SRC_DIR)/*.c)
+OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+CPPFLAGS := -Iinclude -I/usr/include/SDL2 
+CFLAGS := -Wall
+LDLIBS := -lSDL2
 
-stax: stax.o SDL_ext.o piece.o board.o
-	${CC} ${CFLAGS} $^ -o $@
-stax.o: stax.c
-	$(CC) $(CFLAGS) -c $<
-SDL_ext.o: SDL_ext.c
-	$(CC) $(CFLAGS) -c $<
-piece.o: piece.c
-	$(CC) $(CFLAGS) -c $<
-board.o: board.c
-	$(CC) $(CFLAGS) -c $<
+.PHONY: all clean
+
+all: $(EXE)
+
+$(EXE): $(OBJ) | $(BIN_DIR)
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
+$(BIN_DIR) $(OBJ_DIR):
+	mkdir -p $@
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
 debug: CFLAGS += -g
-debug: stax
+debug: $(EXE)
+
 clean:
-	rm stax stax.o SDL_ext.o board.o piece.o
+	rm -rf $(BIN_DIR) $(OBJ_DIR)
