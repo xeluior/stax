@@ -3,4 +3,5 @@
 *.o
 build/
 bin/
+compile_commands.json
 
