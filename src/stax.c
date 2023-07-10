@@ -25,22 +25,22 @@ int main() {
         return -1;
     }
 
-    SDL_Window* main_window = SDL_CreateWindow(
+    SDL_Window* window = SDL_CreateWindow(
             WIN_TITLE,
             SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
             SCREEN_W, SCREEN_H, 
             SDL_WINDOW_RESIZABLE
     );
-    if (main_window == NULL) {
+    if (window == NULL) {
         fprintf(stderr, "%s\n", SDL_GetError());
         SDL_Quit();
         return -1;
     }
 
-    SDL_Surface* main_surface = SDL_GetWindowSurface(main_window);
+    SDL_Surface* main_surface = SDL_GetWindowSurface(window);
     if (main_surface == NULL) {
         fprintf(stderr, "%s\n", SDL_GetError());
-        SDL_DestroyWindow(main_window);
+        SDL_DestroyWindow(window);
         SDL_Quit();
         return -1;
     }
@@ -52,9 +52,8 @@ int main() {
 
     int das_delay = 0;
     game_board* board = board_init();
-
     center(&window_clip, board->rect);
-    SDL_Rect* playfield = outline_rect(board->rect);
+    update_outline(board);
 
     piece_t* current_piece = create_j_piece(board, main_surface->format);
     // End game initialization
@@ -66,7 +65,7 @@ int main() {
     const Uint8* keyboard_state = SDL_GetKeyboardState(NULL);
 
     // start game
-    SDL_ShowWindow(main_window);
+    SDL_ShowWindow(window);
     int exit = false;
     while(!exit) {
         Uint64 start_of_frame = SDL_GetTicks64();
@@ -121,8 +120,7 @@ int main() {
             )
         {
             if (!checked_move(current_piece, v_down, board)) {
-                board->pieces[board->count++] = *current_piece;
-                free(current_piece);
+                board->pieces[board->count++] = current_piece;
                 if (board->count == MAX_PIECES) {
                     exit = true;
                 }
@@ -136,14 +134,14 @@ int main() {
         for (int i = 0; i < board->count; i++) {
             SDL_FillRects(
                     main_surface,
-                    board->pieces[i].pips,
+                    board->pieces[i]->pips,
                     PIECE_CELLS,
-                    board->pieces[i].color
+                    board->pieces[i]->color
             );
         }
         SDL_FillRects(main_surface, current_piece->pips, PIECE_CELLS, current_piece->color);
-        SDL_FillRects(main_surface, playfield, 4, white);
-        SDL_UpdateWindowSurface(main_window);
+        SDL_FillRects(main_surface, board->outline, 4, white);
+        SDL_UpdateWindowSurface(window);
 
         // sync the framerate
         Uint64 time_since_start = SDL_GetTicks64() - start_of_frame;
@@ -156,9 +154,8 @@ int main() {
     // exit
     if (current_piece != NULL) free(current_piece);
     board_free(board);
-    free(playfield);
     SDL_FreeSurface(main_surface);
-    SDL_DestroyWindow(main_window);
+    SDL_DestroyWindow(window);
     SDL_Quit();
     return 0;
 }
@@ -197,7 +194,7 @@ bool checked_move(piece_t* self, SDL_Point mag, game_board* playfield) {
     bool in_playfield = inside(self->pips, PIECE_CELLS, playfield->rect);
     bool piece_collision = false;
     for (int i = 0; i < playfield->count; i++) {
-        if (piece_intersect(self, &playfield->pieces[i])) {
+        if (piece_intersect(self, playfield->pieces[i])) {
             piece_collision = true;
             break;
         }
