@@ -48,7 +48,7 @@ piece_t* init_piece(SDL_PixelFormat* format, char type) {
             break;
         case 'l':
             init_l(self);
-            self->color = SDL_MapRGB(format, 255, 255, 0); //yellow
+            self->color = SDL_MapRGB(format, 255, 128, 0); //orange
             break;
         case 's':
             init_s(self);
