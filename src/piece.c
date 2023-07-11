@@ -54,6 +54,17 @@ piece_t* init_piece(SDL_PixelFormat* format, char type) {
             init_s(self);
             self->color = SDL_MapRGB(format, 0, 255, 0); //green
             break;
+        case 'z':
+            init_z(self);
+            self->color = SDL_MapRGB(format, 255, 0, 0); //red
+            break;
+        case 't':
+            init_t(self);
+            self->color = SDL_MapRGB(format, 128, 0, 128); //purple
+            break;
+        case 'o':
+            init_o(self);
+            self->color = SDL_MapRGB(format, 255, 255, 0); //yellow
     }
     return self;
 }
@@ -93,3 +104,36 @@ void init_s(piece_t* piece) {
     piece->pips[3].x = piece->pips[2].x - CELL_W;
     piece->pips[3].y = piece->pips[2].y;
 }
+
+void init_z(piece_t* piece) {
+    piece->pips[1].x = piece->pips[0].x + CELL_W;
+    piece->pips[1].y = piece->pips[0].y;
+
+    piece->pips[2].x = piece->pips[1].x;
+    piece->pips[2].y = piece->pips[1].y + CELL_H;
+
+    piece->pips[3].x = piece->pips[2].x + CELL_W;
+    piece->pips[3].y = piece->pips[2].y;
+}
+
+void init_t(piece_t* piece) {
+    piece->pips[1].x = piece->pips[0].x - CELL_W;
+    piece->pips[1].y = piece->pips[0].y + CELL_H;
+
+    for (int i = 2; i < PIECE_CELLS; i++) {
+        piece->pips[i].x = piece->pips[i-1].x + CELL_W;
+        piece->pips[i].y = piece->pips[i-1].y;
+    }
+}
+
+void init_o(piece_t* piece) {
+    piece->pips[1].x = piece->pips[0].x;
+    piece->pips[1].y = piece->pips[0].y + CELL_H;
+
+    piece->pips[2].x = piece->pips[1].x + CELL_W;
+    piece->pips[2].y = piece->pips[1].y;
+
+    piece->pips[3].x = piece->pips[2].x;
+    piece->pips[3].y = piece->pips[2].y - CELL_H;
+}
+

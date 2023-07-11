@@ -120,11 +120,11 @@ int main() {
             )
         {
             if (!checked_move(current_piece, v_down, board)) {
-                board->pieces[board->count++] = current_piece;
                 if (board->count == MAX_PIECES) {
                     exit = true;
                 }
                 else {
+                    board->pieces[board->count++] = current_piece;
                     current_piece = create_piece(board, main_surface->format);
                 }
             }
@@ -161,9 +161,9 @@ int main() {
 }
 
 piece_t* create_piece(game_board* board, SDL_PixelFormat* format) {
-    static char piece_types[] = { 'i', 'j', 'l', 's' };
-    static const int types_c = 4;
-    static int types_used = 3;
+    static char piece_types[] = { 'i', 'j', 'l', 's', 'z', 't', 'o' };
+    static const int types_c = 7;
+    static int types_used = 0;
     piece_t* piece = init_piece(format, piece_types[types_used++]);
     types_used %= types_c;
     SDL_Point v = {
