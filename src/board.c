@@ -1,7 +1,7 @@
 #include "board.h"
 #include "SDL_ext.h"
 
-game_board* board_init() {
+game_board* board_init(void) {
     game_board* self = (game_board*) malloc(sizeof(game_board));
     self->count = 0;
     self->rect = (SDL_Rect*) malloc(sizeof(SDL_Rect));

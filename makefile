@@ -7,7 +7,7 @@ EXE := $(BIN_DIR)/stax
 SRC := $(wildcard $(SRC_DIR)/*.c)
 OBJ := $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 CPPFLAGS := -Iinclude -I/usr/include/SDL2 
-CFLAGS := -Wall
+CFLAGS := -Wall -Wextra -Werror
 LDLIBS := -lSDL2
 
 .PHONY: all clean

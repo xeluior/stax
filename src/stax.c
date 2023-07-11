@@ -161,29 +161,14 @@ int main() {
 }
 
 piece_t* create_j_piece(game_board* board, SDL_PixelFormat* format) {
-    piece_t* ret_ptr = (piece_t*) malloc(sizeof(piece_t));
-    ret_ptr->color = SDL_MapRGB(format, 0, 0, 255);
-    ret_ptr->pips[0].x = FIELD_W_CELLS / 2 * CELL_W + left(board->rect);
-    ret_ptr->pips[0].y = top(board->rect);
-    ret_ptr->pips[0].w = CELL_W;
-    ret_ptr->pips[0].h = CELL_H;
-
-    ret_ptr->pips[1].x = ret_ptr->pips[0].x;
-    ret_ptr->pips[1].y = ret_ptr->pips[0].y + CELL_H;
-    ret_ptr->pips[1].w = CELL_W;
-    ret_ptr->pips[1].h = CELL_H;
-
-    ret_ptr->pips[2].x = ret_ptr->pips[1].x + CELL_W;
-    ret_ptr->pips[2].y = ret_ptr->pips[1].y;
-    ret_ptr->pips[2].w = CELL_W;
-    ret_ptr->pips[2].h = CELL_H;
-
-    ret_ptr->pips[3].x = ret_ptr->pips[2].x + CELL_W;
-    ret_ptr->pips[3].y = ret_ptr->pips[2].y;
-    ret_ptr->pips[3].w = CELL_W;
-    ret_ptr->pips[3].h = CELL_H;
-    
-    return ret_ptr;
+    piece_t* piece = init_piece(format, 'j');
+    SDL_Point v = {
+        board->rect->x + board->rect->w / 2 - piece->pips[0].x,
+        board->rect->y - piece->pips[0].y
+    };
+    move_piece(piece, &v);
+    printf("(%d, %d)", piece->pips[0].x, piece->pips[0].y);
+    return piece;
 }
 
 bool checked_move(piece_t* self, SDL_Point mag, game_board* playfield) {

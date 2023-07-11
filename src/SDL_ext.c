@@ -18,7 +18,7 @@ int top(SDL_Rect* rect) {
 }
 
 int leftmost(SDL_Rect* rects, int count) {
-    Uint32 leftmost = INT_MAX;
+    int leftmost = INT_MAX;
     for (int i = 0; i < count; i++) {
         if (left(&rects[i]) < leftmost) {
             leftmost = left(&rects[i]);
@@ -28,7 +28,7 @@ int leftmost(SDL_Rect* rects, int count) {
 }
 
 int rightmost(SDL_Rect* rects, int count) {
-    Uint32 rightmost = 0;
+    int rightmost = 0;
     for (int i = 0; i < count; i++) {
         if (right(&rects[i]) > rightmost) {
             rightmost = right(&rects[i]);
@@ -38,7 +38,7 @@ int rightmost(SDL_Rect* rects, int count) {
 }
 
 int topmost(SDL_Rect* rects, int count) {
-    Uint32 topmost = INT_MAX;
+    int topmost = INT_MAX;
     for (int i = 0; i < count; i++) {
         if (top(&rects[i]) < topmost) {
             topmost = top(&rects[i]);
@@ -48,7 +48,7 @@ int topmost(SDL_Rect* rects, int count) {
 }
 
 int bottomost(SDL_Rect* rects, int count) {
-    Uint32 bottomost = 0;
+    int bottomost = 0;
     for (int i = 0; i < count; i++) {
         if (bottom(&rects[i]) > bottomost) {
             bottomost = bottom(&rects[i]);
