@@ -2,18 +2,233 @@
 #include "SDL_ext.h"
 #include "stax.h"
 
-void init_i(piece_t*);
-void init_j(piece_t*);
-void init_l(piece_t*);
-void init_s(piece_t*);
-void init_z(piece_t*);
-void init_t(piece_t*);
-void init_o(piece_t*);
+SDL_Point piece_rotations[7][4][4] = { // refereced by piece_rotation[PIECE_TYPE_ENUM_VAL][ROTATION_STATE][PIP]
+    { // I_PIECE
+        {
+            // flat
+            { 0, 2 },
+            { 1, 2 },
+            { 2, 2 },
+            { 3, 2 }
+        },
+        {
+            // vertical
+            { 2, 0 },
+            { 2, 1 },
+            { 2, 2 },
+            { 2, 3 }
+        },
+        {
+            // flat
+            { 0, 2 },
+            { 1, 2 },
+            { 2, 2 },
+            { 3, 2 }
+        },
+        {
+            // vertical
+            { 2, 0 },
+            { 2, 1 },
+            { 2, 2 },
+            { 2, 3 }
+        }
+    }, // end I_PIECE
+    {  // O_PIECE
+        {
+            // only rotation
+            { 0, 0 },
+            { 0, 1 },
+            { 1, 0 },
+            { 1, 1 }
+        },
+        {
+            // only rotation
+            { 0, 0 },
+            { 0, 1 },
+            { 1, 0 },
+            { 1, 1 }
+        },
+        {
+            // only rotation
+            { 0, 0 },
+            { 0, 1 },
+            { 1, 0 },
+            { 1, 1 }
+        },
+        {
+            // only rotation
+            { 0, 0 },
+            { 0, 1 },
+            { 1, 0 },
+            { 1, 1 }
+        }
+    }, // end O_PIECE
+    {  // S_PIECE
+        {
+            // flat
+            { 0, 2 },
+            { 1, 2 },
+            { 1, 1 },
+            { 2, 1 }   
+        },
+        {
+            // vertical
+            { 1, 0 },
+            { 1, 1 },
+            { 2, 1 },
+            { 2, 2 }
+        },
+        {
+            // flat
+            { 0, 2 },
+            { 1, 2 },
+            { 1, 1 },
+            { 2, 1 }   
+        },
+        {
+            // vertical
+            { 1, 0 },
+            { 1, 1 },
+            { 2, 1 },
+            { 2, 2 }
+        }
+    }, // end S_PIECE
+    {  // Z_PIECE
+        {
+            // flat
+            { 0, 1 },
+            { 1, 1 },
+            { 1, 2 },
+            { 2, 2 }
+        },
+        {
+            // vertical
+            { 2, 0 },
+            { 2, 1 },
+            { 1, 1 },
+            { 1, 2 }
+        },
+        {
+            // flat
+            { 0, 1 },
+            { 1, 1 },
+            { 1, 2 },
+            { 2, 2 }
+        },
+        {
+            // vertical
+            { 2, 0 },
+            { 2, 1 },
+            { 1, 1 },
+            { 1, 2 }
+        }
+    }, // end Z_PIECE
+    {  // J_PIECE
+        {
+            // down
+            { 0, 1 },
+            { 1, 1 },
+            { 2, 1 },
+            { 2, 2 }
+        },
+        {
+            // left
+            { 1, 0 },
+            { 1, 1 },
+            { 1, 2 },
+            { 0, 2 }
+        },
+        {
+            // up
+            { 2, 1 },
+            { 1, 1 },
+            { 0, 1 },
+            { 0, 0 }
+        },
+        {
+            // right
+            { 1, 2 },
+            { 1, 1 },
+            { 1, 0 },
+            { 2, 0 }
+        }
+    }, // end J_PIECE
+    {  // L_PIECE
+        {
+            // down
+            { 0, 2 },
+            { 0, 1 },
+            { 1, 1 },
+            { 2, 1 }
+        },
+        {
+            // left
+            { 0, 0 },
+            { 1, 0 },
+            { 1, 1 },
+            { 1, 2 }
+        },
+        {
+            // up
+            { 2, 0 },
+            { 0, 1 },
+            { 1, 1 },
+            { 2, 1 }
+        },
+        {
+            // right
+            { 2, 2 },
+            { 1, 2 },
+            { 1, 1 },
+            { 1, 0 }
+        }
+    }, // end L_PIECE
+    {  // T_PIECE
+        {
+            // down
+            { 0, 1 },
+            { 1, 1 },
+            { 1, 2 },
+            { 2, 1 }
+        },
+        {
+            // left
+            { 1, 0 },
+            { 1, 1 },
+            { 0, 1 },
+            { 1, 2 }
+        },
+        {
+            // up
+            { 2, 1 },
+            { 1, 1 },
+            { 1, 0 },
+            { 0, 1 }
+        },
+        {
+            // right
+            { 1, 2 },
+            { 1, 1 },
+            { 2, 1 },
+            { 1, 0 }
+        }
+    } // end T_PIECE
+};
 
 void move_piece(piece_t* self, SDL_Point* vector) {
+    self->bound.x += vector->x;
+    self->bound.y += vector->y;
     for (int i = 0; i < PIECE_CELLS; i++) {
         self->pips[i].x += vector->x;
         self->pips[i].y += vector->y;
+    }
+}
+
+void rotate_piece(piece_t* self) {
+    self->rotation = (self->rotation + 1) % 4;
+    for (int i = 0; i < PIECE_CELLS; i++) {
+        self->pips[i].x = piece_rotations[self->type][self->rotation][i].x * CELL_W + self->bound.x;
+        self->pips[i].y = piece_rotations[self->type][self->rotation][i].y * CELL_H + self->bound.y;
     }
 }
 
@@ -28,112 +243,40 @@ bool piece_intersect(piece_t* piece_a, piece_t* piece_b) {
     return false;
 }
 
-piece_t* init_piece(SDL_PixelFormat* format, char type) {
+piece_t* init_piece(SDL_PixelFormat* format, piece_type type) {
     piece_t* self = (piece_t*) malloc(sizeof(piece_t));
     self->type = type;
-    self->pips[0].x = RECT_UNDEF;
-    self->pips[0].y = RECT_UNDEF;
+    self->rotation = INITIAL_ROTATION;
+    self->bound.x = 0;
+    self->bound.y = 0;
     for (int i = 0; i < PIECE_CELLS; i++) {
         self->pips[i].w = CELL_W;
         self->pips[i].h = CELL_H;
+        self->pips[i].x = piece_rotations[type][INITIAL_ROTATION][i].x * CELL_W;
+        self->pips[i].y = piece_rotations[type][INITIAL_ROTATION][i].y * CELL_H;
     }
     switch (type) {
-        case 'i':
-            init_i(self);
+        case I_PIECE:
             self->color = SDL_MapRGB(format, 0, 255, 255); //cyan
             break;
-        case 'j':
-            init_j(self);
+        case J_PIECE:
             self->color = SDL_MapRGB(format, 0, 0, 255); //blue
             break;
-        case 'l':
-            init_l(self);
+        case L_PIECE:
             self->color = SDL_MapRGB(format, 255, 128, 0); //orange
             break;
-        case 's':
-            init_s(self);
+        case S_PIECE:
             self->color = SDL_MapRGB(format, 0, 255, 0); //green
             break;
-        case 'z':
-            init_z(self);
+        case Z_PIECE:
             self->color = SDL_MapRGB(format, 255, 0, 0); //red
             break;
-        case 't':
-            init_t(self);
+        case T_PIECE:
             self->color = SDL_MapRGB(format, 128, 0, 128); //purple
             break;
-        case 'o':
-            init_o(self);
+        case O_PIECE:
             self->color = SDL_MapRGB(format, 255, 255, 0); //yellow
     }
     return self;
-}
-
-void init_i(piece_t* piece) {
-    for (int i = 1; i < PIECE_CELLS; i++) {
-        piece->pips[i].x = piece->pips[i-1].x + CELL_W;
-        piece->pips[i].y = piece->pips[i-1].y;
-    }
-}
-
-void init_j(piece_t* piece) {
-    piece->pips[1].x = piece->pips[0].x;
-    piece->pips[1].y = piece->pips[0].y + CELL_H;
-    for (int i = 2; i < PIECE_CELLS; i++) {
-        piece->pips[i].x = piece->pips[i-1].x + CELL_W;
-        piece->pips[i].y = piece->pips[i-1].y;
-    }
-}
-
-void init_l(piece_t* piece) {
-    piece->pips[1].x = piece->pips[0].x;
-    piece->pips[1].y = piece->pips[0].y + CELL_H;
-    for (int i = 2; i < PIECE_CELLS; i++) {
-        piece->pips[i].x = piece->pips[i-1].x - CELL_W;
-        piece->pips[i].y = piece->pips[i-1].y;
-    }
-}
-
-void init_s(piece_t* piece) {
-    piece->pips[1].x = piece->pips[0].x - CELL_W;
-    piece->pips[1].y = piece->pips[0].y;
-
-    piece->pips[2].x = piece->pips[1].x;
-    piece->pips[2].y = piece->pips[1].y + CELL_H;
-    
-    piece->pips[3].x = piece->pips[2].x - CELL_W;
-    piece->pips[3].y = piece->pips[2].y;
-}
-
-void init_z(piece_t* piece) {
-    piece->pips[1].x = piece->pips[0].x + CELL_W;
-    piece->pips[1].y = piece->pips[0].y;
-
-    piece->pips[2].x = piece->pips[1].x;
-    piece->pips[2].y = piece->pips[1].y + CELL_H;
-
-    piece->pips[3].x = piece->pips[2].x + CELL_W;
-    piece->pips[3].y = piece->pips[2].y;
-}
-
-void init_t(piece_t* piece) {
-    piece->pips[1].x = piece->pips[0].x - CELL_W;
-    piece->pips[1].y = piece->pips[0].y + CELL_H;
-
-    for (int i = 2; i < PIECE_CELLS; i++) {
-        piece->pips[i].x = piece->pips[i-1].x + CELL_W;
-        piece->pips[i].y = piece->pips[i-1].y;
-    }
-}
-
-void init_o(piece_t* piece) {
-    piece->pips[1].x = piece->pips[0].x;
-    piece->pips[1].y = piece->pips[0].y + CELL_H;
-
-    piece->pips[2].x = piece->pips[1].x + CELL_W;
-    piece->pips[2].y = piece->pips[1].y;
-
-    piece->pips[3].x = piece->pips[2].x;
-    piece->pips[3].y = piece->pips[2].y - CELL_H;
 }
 

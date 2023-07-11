@@ -79,6 +79,10 @@ int main() {
                     switch (event.key.keysym.sym) {
                         case SDLK_ESCAPE:
                             falling = !falling;
+                            break;
+                        case SDLK_UP:
+                            rotate_piece(current_piece);
+                            break;
                     }
             }
         }
@@ -161,10 +165,9 @@ int main() {
 }
 
 piece_t* create_piece(game_board* board, SDL_PixelFormat* format) {
-    static char piece_types[] = { 'i', 'j', 'l', 's', 'z', 't', 'o' };
     static const int types_c = 7;
     static int types_used = 0;
-    piece_t* piece = init_piece(format, piece_types[types_used++]);
+    piece_t* piece = init_piece(format, types_used++);
     types_used %= types_c;
     SDL_Point v = {
         board->rect->x + board->rect->w / 2 - piece->pips[0].x,
