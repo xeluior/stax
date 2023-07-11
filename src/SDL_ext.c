@@ -93,6 +93,12 @@ bool inside(SDL_Rect* inners, int count, SDL_Rect* outer) {
         && (bottomost(inners, count) <= bottom(outer));
 }
 
+bool bucketted(SDL_Rect* inners, int count, SDL_Rect* outer) {
+    return (leftmost(inners, count) >= left(outer))
+        && (rightmost(inners, count) <= right(outer))
+        && (bottomost(inners, count) <= bottom(outer));
+}
+
 SDL_Point invert_point(SDL_Point point) {
     SDL_Point ret = { -point.x, -point.y };
     return ret;

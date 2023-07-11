@@ -33,6 +33,10 @@ SDL_Rect* outline_rect(SDL_Rect* rect);
 // internal use of the *most functions.
 bool inside(SDL_Rect* inners, int count, SDL_Rect* outer);
 
+// works like inside, but ignores the upper boundary, as if the inners were
+// falling into a bucket
+bool bucketted(SDL_Rect* inners, int count, SDL_Rect* outer);
+
 // swaps the sign on both parts of self and returns a pointer to itself
 SDL_Point invert_point(SDL_Point self);
 

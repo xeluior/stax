@@ -3,7 +3,7 @@
 #include "board.h"
 
 // creates a flat j piece in the middle-top of the board
-piece_t* create_j_piece(game_board* board, SDL_PixelFormat* format);
+piece_t* create_piece(game_board* board, SDL_PixelFormat* format);
 
 // tries to move the piece by magnitude, returning true on sucess or false if
 // the piece would move out of the playing area or into another piece
@@ -55,7 +55,7 @@ int main() {
     center(&window_clip, board->rect);
     update_outline(board);
 
-    piece_t* current_piece = create_j_piece(board, main_surface->format);
+    piece_t* current_piece = create_piece(board, main_surface->format);
     // End game initialization
 
     // define colors
@@ -68,7 +68,7 @@ int main() {
     SDL_ShowWindow(window);
     int exit = false;
     while(!exit) {
-        Uint64 start_of_frame = SDL_GetTicks64();
+        unsigned long start_of_frame = SDL_GetTicks64();
         SDL_FillRect(main_surface, &window_clip, black);
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -125,7 +125,7 @@ int main() {
                     exit = true;
                 }
                 else {
-                    current_piece = create_j_piece(board, main_surface->format);
+                    current_piece = create_piece(board, main_surface->format);
                 }
             }
         }
@@ -144,7 +144,7 @@ int main() {
         SDL_UpdateWindowSurface(window);
 
         // sync the framerate
-        Uint64 time_since_start = SDL_GetTicks64() - start_of_frame;
+        unsigned long time_since_start = SDL_GetTicks64() - start_of_frame;
         if (time_since_start > FRAME_MS) {
             time_since_start = FRAME_MS;
         }
@@ -160,14 +160,17 @@ int main() {
     return 0;
 }
 
-piece_t* create_j_piece(game_board* board, SDL_PixelFormat* format) {
-    piece_t* piece = init_piece(format, 'j');
+piece_t* create_piece(game_board* board, SDL_PixelFormat* format) {
+    static char piece_types[] = { 'i', 'j', 'l', 's' };
+    static const int types_c = 4;
+    static int types_used = 3;
+    piece_t* piece = init_piece(format, piece_types[types_used++]);
+    types_used %= types_c;
     SDL_Point v = {
         board->rect->x + board->rect->w / 2 - piece->pips[0].x,
         board->rect->y - piece->pips[0].y
     };
     move_piece(piece, &v);
-    printf("(%d, %d)", piece->pips[0].x, piece->pips[0].y);
     return piece;
 }
 
@@ -176,7 +179,7 @@ bool checked_move(piece_t* self, SDL_Point mag, game_board* playfield) {
     move_piece(self, &mag);
 
     // check for collisions
-    bool in_playfield = inside(self->pips, PIECE_CELLS, playfield->rect);
+    bool in_playfield = bucketted(self->pips, PIECE_CELLS, playfield->rect);
     bool piece_collision = false;
     for (int i = 0; i < playfield->count; i++) {
         if (piece_intersect(self, playfield->pieces[i])) {
