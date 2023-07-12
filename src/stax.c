@@ -126,26 +126,18 @@ int main() {
             )
         {
             if (!checked_move(current_piece, v_down, board)) {
-                if (board->count == MAX_PIECES) {
+                if (!add_piece(board, current_piece)) {
                     exit = true;
                 }
                 else {
-                    board->pieces[board->count++] = current_piece;
                     current_piece = create_piece(board, main_surface->format);
                 }
             }
         }
 
         // draw the screen
-        for (int i = 0; i < board->count; i++) {
-            SDL_FillRects(
-                    main_surface,
-                    board->pieces[i]->pips,
-                    PIECE_CELLS,
-                    board->pieces[i]->color
-            );
-        }
-        SDL_FillRects(main_surface, current_piece->pips, PIECE_CELLS, current_piece->color);
+        draw_board(board, main_surface);
+        draw_piece(current_piece, main_surface);
         SDL_FillRects(main_surface, board->outline, 4, white);
         SDL_UpdateWindowSurface(window);
 
@@ -172,24 +164,11 @@ piece_t* create_piece(game_board* board, SDL_PixelFormat* format) {
     piece_t* piece = init_piece(format, types_used++);
     types_used %= types_c;
     SDL_Point v = {
-        board->rect->x + board->rect->w / 2 - piece->pips[0].x,
-        board->rect->y - piece->pips[0].y
+        board->rect->x + board->rect->w / 2 - piece->bound.x,
+        board->rect->y - piece->bound.y
     };
     move_piece(piece, &v);
     return piece;
-}
-
-bool valid_pos(piece_t* piece, game_board* playfield) {
-    // check for collisions
-    bool in_playfield = bucketted(piece->pips, PIECE_CELLS, playfield->rect);
-    bool piece_collision = false;
-    for (int i = 0; i < playfield->count; i++) {
-        if (piece_intersect(piece, playfield->pieces[i])) {
-            piece_collision = true;
-            break;
-        }
-    }
-    return !piece_collision && in_playfield;
 }
 
 bool checked_rotation(piece_t* piece, game_board* playfield) {
@@ -197,7 +176,7 @@ bool checked_rotation(piece_t* piece, game_board* playfield) {
     rotate_piece(piece, CLOCKWISE);
 
     // undo if nessecary
-    if (!valid_pos(piece, playfield)) {
+    if (!valid_position(playfield, piece)) {
         rotate_piece(piece, COUNTERCLOCKWISE);
         return false;
     }
@@ -210,12 +189,17 @@ bool checked_move(piece_t* piece, SDL_Point mag, game_board* playfield) {
 
     // undo the move if nessecary
     SDL_Point v_inverse = invert_point(mag);
-    if (!valid_pos(piece, playfield)) {
+    if (!valid_position(playfield, piece)) {
         move_piece(piece, &v_inverse);
         return false;
     }
     return true;
 }
 
-
+/*bool row_complete(game_board* board, int row) {
+    bool complete = true;
+    for (int i = 0; i < FIELD_W_CELLS; i++) {
+        if (board->pips[])
+    }
+}*/
 
