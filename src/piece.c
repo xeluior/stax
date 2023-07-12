@@ -2,7 +2,7 @@
 #include "SDL_ext.h"
 #include "stax.h"
 
-SDL_Point piece_rotations[7][4][4] = { // refereced by piece_rotation[PIECE_TYPE_ENUM_VAL][ROTATION_STATE][PIP]
+SDL_Point piece_rotations[PIECE_TYPES][PIECE_ROTATIONS][PIECE_CELLS] = { // refereced by piece_rotation[PIECE_TYPE_ENUM_VAL][ROTATION_STATE][PIP]
     { // I_PIECE
         {
             // flat
@@ -224,8 +224,19 @@ void move_piece(piece_t* self, SDL_Point* vector) {
     }
 }
 
-void rotate_piece(piece_t* self) {
-    self->rotation = (self->rotation + 1) % 4;
+void rotate_piece(piece_t* self, rotation_dir direction) {
+    switch (direction) {
+        case CLOCKWISE:
+            self->rotation += 1;
+            self->rotation %= PIECE_ROTATIONS;
+            break;
+        case COUNTERCLOCKWISE:
+            self->rotation -= 1;
+            while (self->rotation < 0) {
+                self->rotation += PIECE_ROTATIONS;
+            }
+            break;
+    }
     for (int i = 0; i < PIECE_CELLS; i++) {
         self->pips[i].x = piece_rotations[self->type][self->rotation][i].x * CELL_W + self->bound.x;
         self->pips[i].y = piece_rotations[self->type][self->rotation][i].y * CELL_H + self->bound.y;
@@ -272,7 +283,7 @@ piece_t* init_piece(SDL_PixelFormat* format, piece_type type) {
             self->color = SDL_MapRGB(format, 255, 0, 0); //red
             break;
         case T_PIECE:
-            self->color = SDL_MapRGB(format, 128, 0, 128); //purple
+            self->color = SDL_MapRGB(format, 255, 0, 255); //purple
             break;
         case O_PIECE:
             self->color = SDL_MapRGB(format, 255, 255, 0); //yellow

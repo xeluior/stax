@@ -14,6 +14,11 @@ typedef enum piece_types {
     T_PIECE
 } piece_type;
 
+typedef enum rotation_dir {
+    CLOCKWISE,
+    COUNTERCLOCKWISE
+} rotation_dir;
+
 typedef struct piece {
     SDL_Rect pips[PIECE_CELLS];
     SDL_Point bound;
@@ -27,7 +32,7 @@ typedef struct piece {
 bool piece_intersect(piece_t* piece_a, piece_t* piece_b);
 
 // rotates the piece to the next step in the rotation matrix, wrapping if nessecary
-void rotate_piece(piece_t* self);
+void rotate_piece(piece_t* self, rotation_dir direction);
 
 // modifies the postition of each pip of self by the offsets defined in vector
 void move_piece(piece_t* self, SDL_Point* vector);

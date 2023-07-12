@@ -1,6 +1,7 @@
 #include "stax.h"
 #include "SDL_ext.h"
 #include "board.h"
+#include "piece.h"
 
 // creates a flat j piece in the middle-top of the board
 piece_t* create_piece(game_board* board, SDL_PixelFormat* format);
@@ -8,6 +9,7 @@ piece_t* create_piece(game_board* board, SDL_PixelFormat* format);
 // tries to move the piece by magnitude, returning true on sucess or false if
 // the piece would move out of the playing area or into another piece
 bool checked_move(piece_t* self, SDL_Point mag, game_board* playfield);
+bool checked_rotation(piece_t* piece, game_board* playfield);
 
 int gravity = 16;
 int falling = true;
@@ -81,7 +83,7 @@ int main() {
                             falling = !falling;
                             break;
                         case SDLK_UP:
-                            rotate_piece(current_piece);
+                            checked_rotation(current_piece, board);
                             break;
                     }
             }
@@ -177,26 +179,43 @@ piece_t* create_piece(game_board* board, SDL_PixelFormat* format) {
     return piece;
 }
 
-bool checked_move(piece_t* self, SDL_Point mag, game_board* playfield) {
-    // try move piece
-    move_piece(self, &mag);
-
+bool valid_pos(piece_t* piece, game_board* playfield) {
     // check for collisions
-    bool in_playfield = bucketted(self->pips, PIECE_CELLS, playfield->rect);
+    bool in_playfield = bucketted(piece->pips, PIECE_CELLS, playfield->rect);
     bool piece_collision = false;
     for (int i = 0; i < playfield->count; i++) {
-        if (piece_intersect(self, playfield->pieces[i])) {
+        if (piece_intersect(piece, playfield->pieces[i])) {
             piece_collision = true;
             break;
         }
     }
+    return !piece_collision && in_playfield;
+}
 
-    // undo the move if nessecary
-    SDL_Point v_inverse = invert_point(mag);
-    if (piece_collision || !in_playfield) {
-        move_piece(self, &v_inverse);
+bool checked_rotation(piece_t* piece, game_board* playfield) {
+    // try the rotation
+    rotate_piece(piece, CLOCKWISE);
+
+    // undo if nessecary
+    if (!valid_pos(piece, playfield)) {
+        rotate_piece(piece, COUNTERCLOCKWISE);
         return false;
     }
     return true;
 }
+
+bool checked_move(piece_t* piece, SDL_Point mag, game_board* playfield) {
+    // try move piece
+    move_piece(piece, &mag);
+
+    // undo the move if nessecary
+    SDL_Point v_inverse = invert_point(mag);
+    if (!valid_pos(piece, playfield)) {
+        move_piece(piece, &v_inverse);
+        return false;
+    }
+    return true;
+}
+
+
 
