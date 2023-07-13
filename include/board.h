@@ -38,5 +38,9 @@ bool add_piece(game_board* self, piece_t* piece);
 // not intersect with any existing cells in the board. O(PIECE_CELLS)
 bool valid_position(game_board* self, piece_t* piece);
 
+// clears the given row if it is complete and returns false otherwise. Moves
+// all other rows down.
+bool clear_row(game_board* self, int row);
+
 #endif
 

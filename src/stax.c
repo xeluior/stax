@@ -131,6 +131,9 @@ int main() {
                 }
                 else {
                     current_piece = create_piece(board, main_surface->format);
+                    for (int row = 0; row < FIELD_H_CELLS; row++) {
+                        clear_row(board, row);
+                    }
                 }
             }
         }
@@ -195,11 +198,4 @@ bool checked_move(piece_t* piece, SDL_Point mag, game_board* playfield) {
     }
     return true;
 }
-
-/*bool row_complete(game_board* board, int row) {
-    bool complete = true;
-    for (int i = 0; i < FIELD_W_CELLS; i++) {
-        if (board->pips[])
-    }
-}*/
 

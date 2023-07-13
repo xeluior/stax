@@ -80,3 +80,30 @@ bool valid_position(game_board* self, piece_t* piece) {
     return true;
 }
 
+bool row_complete(game_board* self, int row) {
+    for (int col = 0; col < FIELD_W_CELLS; col++) {
+        if (self->cells[row][col] == NULL) return false;
+    }
+    return true;
+}
+
+bool clear_row(game_board* self, int row) {
+    if (!row_complete(self, row)) return false;
+
+    for (int col = 0; col < FIELD_W_CELLS; col++) {
+        free(self->cells[row][col]);
+    }
+
+    for (int i = row; i > 0; i--) {
+        for (int j = 0; j < FIELD_W_CELLS; j++) {
+            self->cells[i][j] = self->cells[i-1][j];
+            if (self->cells[i][j] != NULL) self->cells[i][j]->rect.y += CELL_H;
+        }
+    }
+
+    for (int i = 0; i < FIELD_W_CELLS; i++) {
+        self->cells[0][i] = NULL;
+    }
+    return true;
+}
+
