@@ -12,6 +12,7 @@ piece_t* create_piece(game_board* board, SDL_PixelFormat* format);
 // the piece would move out of the playing area or into another piece
 bool checked_move(piece_t* self, SDL_Point mag, game_board* playfield);
 bool checked_rotation(piece_t* piece, game_board* playfield);
+void play_piece(game_board* board, piece_t* piece);
 
 int gravity = 16;
 int falling = true;
@@ -64,6 +65,8 @@ int main() {
     srand(time(NULL));
 
     piece_t* current_piece = create_piece(board, main_surface->format);
+    piece_t* next_piece = create_piece(board, main_surface->format);
+    play_piece(board, current_piece);
     // End game initialization
 
     // start game
@@ -130,7 +133,9 @@ int main() {
                     exit = true;
                 }
                 else {
-                    current_piece = create_piece(board, main_surface->format);
+                    current_piece = next_piece;
+                    next_piece = create_piece(board, main_surface->format);
+                    play_piece(board, current_piece);
                     for (int row = 0; row < FIELD_H_CELLS; row++) {
                         clear_row(board, row);
                     }
@@ -141,6 +146,7 @@ int main() {
         // draw the screen
         draw_board(board, main_surface);
         draw_piece(current_piece, main_surface);
+        draw_piece(next_piece, main_surface);
         SDL_UpdateWindowSurface(window);
 
         // sync the framerate
@@ -153,6 +159,7 @@ int main() {
 
     // exit
     if (current_piece != NULL) free(current_piece);
+    if (next_piece != NULL) free(next_piece);
     board_free(board);
     SDL_FreeSurface(main_surface);
     SDL_DestroyWindow(window);
@@ -163,11 +170,19 @@ int main() {
 piece_t* create_piece(game_board* board, SDL_PixelFormat* format) {
     piece_t* piece = init_piece(format, rand() % 7);
     SDL_Point v = {
-        board->rect->x + board->rect->w / 2 - piece->bound.x,
-        board->rect->y - piece->bound.y
+        right(board->rect) + CELL_W,
+        board->rect->h / 2 + top(board->rect)
     };
     move_piece(piece, &v);
     return piece;
+}
+
+void play_piece(game_board* board, piece_t* piece) {
+    SDL_Point v = {
+        board->rect->w / 2 - piece->bound.x - CELL_W * 2 + board->rect->x,
+        top(board->rect) - piece->bound.y
+    };
+    move_piece(piece, &v);
 }
 
 bool checked_rotation(piece_t* piece, game_board* playfield) {
