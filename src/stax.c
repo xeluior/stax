@@ -1,3 +1,5 @@
+#include <time.h>
+
 #include "stax.h"
 #include "SDL_ext.h"
 #include "board.h"
@@ -57,14 +59,12 @@ int main() {
     center(&window_clip, board->rect);
     update_outline(board);
 
+    Uint32 black = SDL_MapRGB(main_surface->format, 0, 0, 0);
+    const Uint8* keyboard_state = SDL_GetKeyboardState(NULL);
+    srand(time(NULL));
+
     piece_t* current_piece = create_piece(board, main_surface->format);
     // End game initialization
-
-    // define colors
-    Uint32 white = SDL_MapRGB(main_surface->format, 255, 255, 255);
-    Uint32 black = SDL_MapRGB(main_surface->format, 0, 0, 0);
-
-    const Uint8* keyboard_state = SDL_GetKeyboardState(NULL);
 
     // start game
     SDL_ShowWindow(window);
@@ -141,7 +141,6 @@ int main() {
         // draw the screen
         draw_board(board, main_surface);
         draw_piece(current_piece, main_surface);
-        SDL_FillRects(main_surface, board->outline, 4, white);
         SDL_UpdateWindowSurface(window);
 
         // sync the framerate
@@ -162,10 +161,7 @@ int main() {
 }
 
 piece_t* create_piece(game_board* board, SDL_PixelFormat* format) {
-    static const int types_c = 7;
-    static int types_used = 0;
-    piece_t* piece = init_piece(format, types_used++);
-    types_used %= types_c;
+    piece_t* piece = init_piece(format, rand() % 7);
     SDL_Point v = {
         board->rect->x + board->rect->w / 2 - piece->bound.x,
         board->rect->y - piece->bound.y
