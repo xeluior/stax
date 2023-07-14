@@ -14,14 +14,13 @@ bool checked_move(piece_t* self, SDL_Point mag, game_board* playfield);
 bool checked_rotation(piece_t* piece, game_board* playfield);
 void play_piece(game_board* board, piece_t* piece);
 
-int gravity = 16;
-int falling = true;
-int g_counter = 0;
 
-SDL_Point v_up = { 0, -CELL_H };
-SDL_Point v_down = { 0, CELL_H };
-SDL_Point v_left = { -CELL_W, 0 };
-SDL_Point v_right  = { CELL_W, 0 };
+unsigned int gravity_from_level(unsigned int level);
+
+const SDL_Point v_up = { 0, -CELL_H };
+const SDL_Point v_down = { 0, CELL_H };
+const SDL_Point v_left = { -CELL_W, 0 };
+const SDL_Point v_right  = { CELL_W, 0 };
 
 int main() {
     // Begin SDL Boilerplate
@@ -56,6 +55,10 @@ int main() {
     SDL_GetClipRect(main_surface, &window_clip);
 
     int das_delay = 0;
+    int falling = true;
+    int g_counter = 0;
+    int lines = 0;
+
     game_board* board = board_init();
     center(&window_clip, board->rect);
     update_outline(board);
@@ -74,7 +77,6 @@ int main() {
     int exit = false;
     while(!exit) {
         unsigned long start_of_frame = SDL_GetTicks64();
-        SDL_FillRect(main_surface, &window_clip, black);
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -86,7 +88,7 @@ int main() {
                             falling = !falling;
                             break;
                         case SDLK_UP:
-                            checked_rotation(current_piece, board);
+                            if (falling) checked_rotation(current_piece, board);
                             break;
                     }
             }
@@ -121,11 +123,11 @@ int main() {
         // drop the piece
         if (falling) {
             g_counter += 1;
-            g_counter %= gravity * 2;
+            g_counter %= gravity_from_level(lines / 10);
         }
 
         if (g_counter == 0
-                || (g_counter == gravity && keyboard_state[SDL_SCANCODE_DOWN])
+                || (g_counter == gravity_from_level(lines / 10) / 2 && keyboard_state[SDL_SCANCODE_DOWN])
             )
         {
             if (!checked_move(current_piece, v_down, board)) {
@@ -137,16 +139,21 @@ int main() {
                     next_piece = create_piece(board, main_surface->format);
                     play_piece(board, current_piece);
                     for (int row = 0; row < FIELD_H_CELLS; row++) {
-                        clear_row(board, row);
+                        if (clear_row(board, row)) {
+                            lines += 1;
+                        }
                     }
                 }
             }
         }
 
         // draw the screen
-        draw_board(board, main_surface);
-        draw_piece(current_piece, main_surface);
-        draw_piece(next_piece, main_surface);
+        SDL_FillRect(main_surface, &window_clip, black);
+        if (falling) {
+            draw_board(board, main_surface);
+            draw_piece(current_piece, main_surface);
+            draw_piece(next_piece, main_surface);
+        }
         SDL_UpdateWindowSurface(window);
 
         // sync the framerate
@@ -158,6 +165,7 @@ int main() {
     }
 
     // exit
+    printf("%d cleared\n", lines);
     if (current_piece != NULL) free(current_piece);
     if (next_piece != NULL) free(next_piece);
     board_free(board);
@@ -208,5 +216,20 @@ bool checked_move(piece_t* piece, SDL_Point mag, game_board* playfield) {
         return false;
     }
     return true;
+}
+
+unsigned int gravity_from_level(unsigned int level) {
+    if (level <= 8) {
+        return 48 - level * 5;
+    }
+    else if (level <= 18) {
+        return 9 - level / 3;
+    }
+    else if (level <= 28) {
+        return 2;
+    }
+    else {
+        return 1;
+    }
 }
 
