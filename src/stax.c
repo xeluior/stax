@@ -1,4 +1,5 @@
 #include <time.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "stax.h"
 #include "SDL_ext.h"
@@ -48,16 +49,25 @@ int main() {
         SDL_Quit();
         return -1;
     }
+
+    if (!TTF_Init()) {
+        fprintf(stderr, "%s\n", TTF_GetError());
+        fprintf(stderr, "Fonts will not be displayed");
+    }
     // End SDL Boilerplate
 
     // Begin game initialization
     SDL_Rect window_clip;
     SDL_GetClipRect(main_surface, &window_clip);
 
+    const int line_scores[] = { 0, 40, 100, 300, 1200 };
     int das_delay = 0;
     int falling = true;
     int g_counter = 0;
     int lines = 0;
+    int level = 0;
+    int gravity = gravity_from_level(level);
+    int score = 0;
 
     game_board* board = board_init();
     center(&window_clip, board->rect);
@@ -123,12 +133,12 @@ int main() {
         // drop the piece
         if (falling) {
             g_counter += 1;
-            g_counter %= gravity_from_level(lines / LINES_PER_LEVEL);
+            g_counter %= gravity;
         }
 
         if (g_counter == 0
                 || (
-                    g_counter == (gravity_from_level(lines / LINES_PER_LEVEL) / SOFT_DROP_MULT)
+                    g_counter == gravity / SOFT_DROP_MULT
                     && keyboard_state[SDL_SCANCODE_DOWN]
                    )
            )
@@ -145,11 +155,17 @@ int main() {
                     exit = true;
                 }
                 else {
+                    int cleared_rows = 0;
                     for (int row = row_min; row <= row_max; row++) {
                         if (clear_row(board, row)) {
-                            lines += 1;
+                            cleared_rows += 1;
                         }
                     }
+                    lines += cleared_rows;
+                    level = lines / LINES_PER_LEVEL;
+                    gravity = gravity_from_level(level);
+                    score += line_scores[cleared_rows] * (level + 1);
+
                     current_piece = next_piece;
                     next_piece = create_piece(board, main_surface->format);
                     play_piece(board, current_piece);
@@ -175,7 +191,7 @@ int main() {
     }
 
     // exit
-    printf("%d cleared\n", lines);
+    printf("%d    lvl %d\n", score, level);
     if (current_piece != NULL) free(current_piece);
     if (next_piece != NULL) free(next_piece);
     board_free(board);
