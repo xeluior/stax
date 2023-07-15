@@ -5,6 +5,7 @@
 #include "SDL_ext.h"
 #include "board.h"
 #include "piece.h"
+#include "score.h"
 
 // creates a flat j piece in the middle-top of the board
 piece_t* create_piece(game_board* board, SDL_PixelFormat* format);
@@ -14,7 +15,6 @@ piece_t* create_piece(game_board* board, SDL_PixelFormat* format);
 bool checked_move(piece_t* self, SDL_Point mag, game_board* playfield);
 bool checked_rotation(piece_t* piece, game_board* playfield);
 void play_piece(game_board* board, piece_t* piece);
-
 
 unsigned int gravity_from_level(unsigned int level);
 
@@ -50,9 +50,9 @@ int main() {
         return -1;
     }
 
-    if (!TTF_Init()) {
+    if (TTF_Init() < 0) {
         fprintf(stderr, "%s\n", TTF_GetError());
-        fprintf(stderr, "Fonts will not be displayed");
+        fprintf(stderr, "Fonts will not be displayed\n");
     }
     // End SDL Boilerplate
 
@@ -67,7 +67,8 @@ int main() {
     int lines = 0;
     int level = 0;
     int gravity = gravity_from_level(level);
-    int score = 0;
+
+    score* game_score = init_score();
 
     game_board* board = board_init();
     center(&window_clip, board->rect);
@@ -161,10 +162,12 @@ int main() {
                             cleared_rows += 1;
                         }
                     }
-                    lines += cleared_rows;
-                    level = lines / LINES_PER_LEVEL;
-                    gravity = gravity_from_level(level);
-                    score += line_scores[cleared_rows] * (level + 1);
+                    if (cleared_rows > 0) {
+                        lines += cleared_rows;
+                        level = lines / LINES_PER_LEVEL;
+                        gravity = gravity_from_level(level);
+                        update_score(game_score, line_scores[cleared_rows] * (level + 1));
+                    }
 
                     current_piece = next_piece;
                     next_piece = create_piece(board, main_surface->format);
@@ -180,6 +183,7 @@ int main() {
             draw_piece(current_piece, main_surface);
             draw_piece(next_piece, main_surface);
         }
+        draw_score(game_score, main_surface);
         SDL_UpdateWindowSurface(window);
 
         // sync the framerate
@@ -191,7 +195,6 @@ int main() {
     }
 
     // exit
-    printf("%d    lvl %d\n", score, level);
     if (current_piece != NULL) free(current_piece);
     if (next_piece != NULL) free(next_piece);
     board_free(board);
