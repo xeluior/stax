@@ -123,26 +123,36 @@ int main() {
         // drop the piece
         if (falling) {
             g_counter += 1;
-            g_counter %= gravity_from_level(lines / 10);
+            g_counter %= gravity_from_level(lines / LINES_PER_LEVEL);
         }
 
         if (g_counter == 0
-                || (g_counter == gravity_from_level(lines / 10) / 2 && keyboard_state[SDL_SCANCODE_DOWN])
-            )
+                || (
+                    g_counter == (gravity_from_level(lines / LINES_PER_LEVEL) / SOFT_DROP_MULT)
+                    && keyboard_state[SDL_SCANCODE_DOWN]
+                   )
+           )
         {
             if (!checked_move(current_piece, v_down, board)) {
+                int row_max = 0;
+                int row_min = INT_MAX;
+                for (int i = 0; i < PIECE_CELLS; i++) {
+                    int row = (current_piece->cells[i]->rect.y - board->rect->y) / CELL_H;
+                    if (row_max < row) row_max = row;
+                    if (row_min > row) row_min = row;
+                }
                 if (!add_piece(board, current_piece)) {
                     exit = true;
                 }
                 else {
-                    current_piece = next_piece;
-                    next_piece = create_piece(board, main_surface->format);
-                    play_piece(board, current_piece);
-                    for (int row = 0; row < FIELD_H_CELLS; row++) {
+                    for (int row = row_min; row <= row_max; row++) {
                         if (clear_row(board, row)) {
                             lines += 1;
                         }
                     }
+                    current_piece = next_piece;
+                    next_piece = create_piece(board, main_surface->format);
+                    play_piece(board, current_piece);
                 }
             }
         }
@@ -176,7 +186,7 @@ int main() {
 }
 
 piece_t* create_piece(game_board* board, SDL_PixelFormat* format) {
-    piece_t* piece = init_piece(format, rand() % 7);
+    piece_t* piece = init_piece(format, rand() % PIECE_TYPES);
     SDL_Point v = {
         right(board->rect) + CELL_W,
         board->rect->h / 2 + top(board->rect)
