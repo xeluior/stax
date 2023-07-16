@@ -5,7 +5,7 @@
 #include "SDL_ext.h"
 #include "board.h"
 #include "piece.h"
-#include "score.h"
+#include "ui_number.h"
 
 // creates a flat j piece in the middle-top of the board
 piece_t* create_piece(game_board* board, SDL_PixelFormat* format);
@@ -60,15 +60,18 @@ int main() {
     SDL_Rect window_clip;
     SDL_GetClipRect(main_surface, &window_clip);
 
+    ui_number* score = init_number("%010d", 0);
+    ui_number* level = init_number("Lv%02d", 0);
+    ui_number* lines = init_number("Lines%03d", 0);
+
+    level->rect.y = score->rect.y + score->rect.h;
+    lines->rect.y = level->rect.y + level->rect.h;
+
     const int line_scores[] = { 0, 40, 100, 300, 1200 };
     int das_delay = 0;
     int falling = true;
     int g_counter = 0;
-    int lines = 0;
-    int level = 0;
-    int gravity = gravity_from_level(level);
-
-    score* game_score = init_score();
+    int gravity = gravity_from_level(level->number);
 
     game_board* board = board_init();
     center(&window_clip, board->rect);
@@ -163,10 +166,10 @@ int main() {
                         }
                     }
                     if (cleared_rows > 0) {
-                        lines += cleared_rows;
-                        level = lines / LINES_PER_LEVEL;
-                        gravity = gravity_from_level(level);
-                        update_score(game_score, line_scores[cleared_rows] * (level + 1));
+                        set_number(lines, lines->number + cleared_rows);
+                        set_number(level, lines->number / LINES_PER_LEVEL);
+                        set_number(score, score->number + line_scores[cleared_rows] * (level->number + 1));
+                        gravity = gravity_from_level(level->number);
                     }
 
                     current_piece = next_piece;
@@ -183,7 +186,9 @@ int main() {
             draw_piece(current_piece, main_surface);
             draw_piece(next_piece, main_surface);
         }
-        draw_score(game_score, main_surface);
+        draw_number(score, main_surface);
+        draw_number(level, main_surface);
+        draw_number(lines, main_surface);
         SDL_UpdateWindowSurface(window);
 
         // sync the framerate
@@ -198,6 +203,7 @@ int main() {
     if (current_piece != NULL) free(current_piece);
     if (next_piece != NULL) free(next_piece);
     board_free(board);
+    free_number(score);
     SDL_FreeSurface(main_surface);
     SDL_DestroyWindow(window);
     SDL_Quit();
