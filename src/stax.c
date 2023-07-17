@@ -1,6 +1,7 @@
 #include <time.h>
 #include <SDL2/SDL_ttf.h>
 
+#include "SDL_filesystem.h"
 #include "stax.h"
 #include "SDL_ext.h"
 #include "board.h"
@@ -16,12 +17,14 @@ bool checked_move(piece_t* self, SDL_Point mag, game_board* playfield);
 bool checked_rotation(piece_t* piece, game_board* playfield);
 void play_piece(game_board* board, piece_t* piece);
 
-unsigned int gravity_from_level(unsigned int level);
+unsigned int gravity_from_level(int level);
 
 const SDL_Point v_up = { 0, -CELL_H };
 const SDL_Point v_down = { 0, CELL_H };
 const SDL_Point v_left = { -CELL_W, 0 };
 const SDL_Point v_right  = { CELL_W, 0 };
+
+char* base_dir = NULL;
 
 int main() {
     // Begin SDL Boilerplate
@@ -54,6 +57,8 @@ int main() {
         fprintf(stderr, "%s\n", TTF_GetError());
         fprintf(stderr, "Fonts will not be displayed\n");
     }
+
+    base_dir = SDL_GetBasePath();
     // End SDL Boilerplate
 
     // Begin game initialization
@@ -204,6 +209,7 @@ int main() {
     if (next_piece != NULL) free(next_piece);
     board_free(board);
     free_number(score);
+    SDL_free(base_dir);
     SDL_FreeSurface(main_surface);
     SDL_DestroyWindow(window);
     SDL_Quit();
@@ -253,7 +259,7 @@ bool checked_move(piece_t* piece, SDL_Point mag, game_board* playfield) {
     return true;
 }
 
-unsigned int gravity_from_level(unsigned int level) {
+unsigned int gravity_from_level(int level) {
     if (level <= 8) {
         return 48 - level * 5;
     }

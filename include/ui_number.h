@@ -1,3 +1,6 @@
+#ifndef _UI_NUMBER
+#define _UI_NUMBER
+
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_surface.h>
@@ -11,7 +14,6 @@ typedef struct ui_number {
     int number;
     char text[10];
     char* fmt;
-    TTF_Font* font;
     SDL_Color color;
     SDL_Rect rect;
     SDL_Surface* surface;
@@ -22,4 +24,6 @@ ui_number* init_number(char* fmt, int number);
 void set_number(ui_number* self, int mag);
 void draw_number(ui_number* self, SDL_Surface* dst);
 void free_number(ui_number* self);
+
+#endif
 

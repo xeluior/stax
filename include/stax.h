@@ -28,5 +28,8 @@
 #define INITIAL_ROTATION 0
 #define LINES_PER_LEVEL 10
 #define SOFT_DROP_MULT 2
+
+extern char* base_dir;
+
 #endif
 
