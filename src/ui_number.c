@@ -29,7 +29,7 @@ ui_number* init_number(char* fmt, int number) {
     if (!TTF_WasInit()) TTF_Init();
     ui_number* self = malloc(sizeof(ui_number));
     size_t fmt_len = strnlen(fmt, FMT_LEN) + 1;
-    self->fmt = malloc(sizeof(char) * fmt_len);
+    self->fmt = calloc(fmt_len, sizeof(char));
     strncpy(self->fmt, fmt, fmt_len);
 
     self->number = number;
@@ -37,8 +37,7 @@ ui_number* init_number(char* fmt, int number) {
 
     if (ui_font == NULL) {
         int path_len = strlen(base_dir) + strlen(FONT_PATH_REL) + 1;
-        char* font_path = malloc(sizeof(char) * path_len);
-        memset(font_path, 0, path_len);
+        char* font_path = calloc(path_len, sizeof(char));
 
         strcpy(font_path, base_dir);
         strcat(font_path, FONT_PATH_REL);
