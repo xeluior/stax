@@ -27,9 +27,9 @@ void draw_number(ui_number* self, SDL_Surface* dst) {
 
 ui_number* init_number(char* fmt, int number) {
     if (!TTF_WasInit()) TTF_Init();
-    ui_number* self = (ui_number*) malloc(sizeof(ui_number));
+    ui_number* self = malloc(sizeof(ui_number));
     size_t fmt_len = strnlen(fmt, FMT_LEN) + 1;
-    self->fmt = (char*) malloc(sizeof(char) * fmt_len);
+    self->fmt = malloc(sizeof(char) * fmt_len);
     strncpy(self->fmt, fmt, fmt_len);
 
     self->number = number;
@@ -37,7 +37,7 @@ ui_number* init_number(char* fmt, int number) {
 
     if (ui_font == NULL) {
         int path_len = strlen(base_dir) + strlen(FONT_PATH_REL) + 1;
-        char* font_path = (char*) malloc(sizeof(char) * path_len);
+        char* font_path = malloc(sizeof(char) * path_len);
         memset(font_path, 0, path_len);
 
         strcpy(font_path, base_dir);

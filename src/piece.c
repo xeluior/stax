@@ -255,13 +255,13 @@ bool piece_intersect(piece_t* piece_a, piece_t* piece_b) {
 }
 
 piece_t* init_piece(SDL_PixelFormat* format, piece_type type) {
-    piece_t* self = (piece_t*) malloc(sizeof(piece_t));
+    piece_t* self = malloc(sizeof(piece_t));
     self->type = type;
     self->rotation = INITIAL_ROTATION;
     self->bound.x = 0;
     self->bound.y = 0;
     for (int i = 0; i < PIECE_CELLS; i++) {
-        self->cells[i] = (cell*) malloc(sizeof(cell));
+        self->cells[i] = malloc(sizeof(cell));
         self->cells[i]->rect.w = CELL_W;
         self->cells[i]->rect.h = CELL_H;
         self->cells[i]->rect.x = piece_rotations[type][INITIAL_ROTATION][i].x * CELL_W;

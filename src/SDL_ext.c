@@ -63,7 +63,7 @@ void center(SDL_Rect* parent, SDL_Rect* child) {
 }
 
 SDL_Rect* outline_rect(SDL_Rect* rect) {
-    SDL_Rect* ret_ptr = (SDL_Rect*) malloc(sizeof(SDL_Rect)*4);
+    SDL_Rect* ret_ptr = malloc(sizeof(SDL_Rect)*4);
     ret_ptr[0].x = rect->x;
     ret_ptr[0].y = rect->y;
     ret_ptr[0].w = rect->w;

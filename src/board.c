@@ -2,8 +2,8 @@
 #include "SDL_ext.h"
 
 game_board* board_init(void) {
-    game_board* self = (game_board*) malloc(sizeof(game_board));
-    self->rect = (SDL_Rect*) malloc(sizeof(SDL_Rect));
+    game_board* self = malloc(sizeof(game_board));
+    self->rect = malloc(sizeof(SDL_Rect));
     self->rect->w = FIELD_W_PX;
     self->rect->h = FIELD_H_PX;
     self->outline = outline_rect(self->rect);
