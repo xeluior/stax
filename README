@@ -1,0 +1,17 @@
+Stax is a classic-style falling block puzzle game where the player aligns
+randomly generated pieces to complete rows and earn points. The game controls
+almost entirely with the keyboard D-Pad.
+
+- Up to rotate the piece
+- Left and Right to shift the piece
+- Down to double the falling speed
+
+The player can use Esc or Ctrl-C to quit the game at any time.
+
+The game makes use of the SDL2 and SDL2_ttf libraries both made available by
+libsdl.org under the zlib license. It also makes use of Monogram available at
+https://itch.io/t/214662/monogram-a-free-monospace-pixel-font licensed CC0.
+
+The game itself is licensed under the GNU GPLv3, see LICENSE for the full text
+and is provided as-is and without warranty.
+
