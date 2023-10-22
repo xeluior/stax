@@ -1,0 +1,34 @@
+name: Build and Release Game
+on:
+  push:
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    - name: Install dependencies
+      run: |
+        if [ ${{ matrix.os }} == 'windows-latest' ]; then
+          echo "::add-path::C:/mingw-w64/x86_64-8.1.0-posix-seh-rt_v6-rev0/mingw64/bin"
+          choco install meson ninja
+          choco install sdl2 sdl2_ttf
+        elif [ ${{ matrix.os }} == 'ubuntu-latest' ]; then
+          sudo apt-get install -y meson ninja-build libsdl2-dev libsdl2-ttf-dev
+        elif [ ${{ matrix.os }} == 'macos-latest' ]; then
+          brew install meson ninja sdl2 sdl2_ttf
+        fi
+    - name: Set up Meson and Ninja
+      run: |
+        meson setup --buildtype=release build
+    - name: Build game
+      run: meson compile -C build
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: Game build
+        path: build/
+
