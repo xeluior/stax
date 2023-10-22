@@ -14,8 +14,7 @@ jobs:
       shell: bash
       run: |
         if [[ ${{ matrix.os }} == 'windows-latest' ]]; then
-          choco install meson ninja
-          choco install sdl2 sdl2_ttf
+          choco upgrade -y --accept-license meson sdl2 sdl2_ttf ninja
         elif [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
           sudo apt-get install -y meson ninja-build libsdl2-dev libsdl2-ttf-dev
         elif [[ ${{ matrix.os }} == 'macos-latest' ]]; then
