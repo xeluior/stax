@@ -6,16 +6,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, macos-latest]
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
     - name: Install dependencies
       shell: bash
       run: |
-        if [[ ${{ matrix.os }} == 'windows-latest' ]]; then
-          choco upgrade -y --accept-license meson sdl2 sdl2_ttf ninja
-        elif [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
+        if [[ ${{ matrix.os }} == 'ubuntu-latest' ]]; then
           sudo apt-get install -y meson ninja-build libsdl2-dev libsdl2-ttf-dev
         elif [[ ${{ matrix.os }} == 'macos-latest' ]]; then
           brew install meson ninja sdl2 sdl2_ttf
