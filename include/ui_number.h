@@ -17,9 +17,9 @@
 #ifndef _UI_NUMBER
 #define _UI_NUMBER
 
-#include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL_rect.h>
-#include <SDL2/SDL_surface.h>
+#include <SDL_ttf.h>
+#include <SDL_rect.h>
+#include <SDL_surface.h>
 #include <limits.h>
 #include <string.h>
 

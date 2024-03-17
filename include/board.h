@@ -17,7 +17,7 @@
 #ifndef _BOARD_H
 #define _BOARD_H
 
-#include <SDL2/SDL_rect.h>
+#include <SDL_rect.h>
 #include "stax.h"
 #include "piece.h"
 #include "SDL_ext.h"

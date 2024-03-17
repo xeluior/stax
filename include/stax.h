@@ -17,7 +17,7 @@
 #ifndef _STAX_H
 #define _STAX_H
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 #include <stdbool.h>
 #include <limits.h>
 #include <stdio.h>

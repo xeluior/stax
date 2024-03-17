@@ -15,7 +15,7 @@
  * Stax. If not, see <https://www.gnu.org/licenses/>. 
  */
 #include <time.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL_ttf.h>
 
 #include "SDL_filesystem.h"
 #include "stax.h"
