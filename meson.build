@@ -3,6 +3,9 @@ project('stax', 'c', version: '0.1.0')
 deps = []
 deps += dependency('SDL2')
 deps += dependency('SDL2_ttf')
+if host_machine.system() == 'windows'
+  deps += dependency('sdl2main')
+endif
 
 src = []
 src += 'src/stax.c'
