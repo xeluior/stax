@@ -28,7 +28,7 @@
 
 typedef struct ui_number {
     int number;
-    char text[10];
+    char text[11];
     char* fmt;
     SDL_Color color;
     SDL_Rect rect;

@@ -75,6 +75,10 @@ int main() {
     }
 
     base_dir = SDL_GetBasePath();
+    if (base_dir == NULL) {
+      fprintf(stderr, "%s\n", SDL_GetError());
+      return -1;
+    }
     // End SDL Boilerplate
 
     // Begin game initialization

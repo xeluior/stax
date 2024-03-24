@@ -14,5 +14,6 @@ src += 'src/board.c'
 src += 'src/SDL_ext.c'
 src += 'src/ui_number.c'
 
-executable('stax', src, dependencies: deps, include_directories: 'include')
+executable('stax', src, dependencies: deps, include_directories: 'include', install: true)
+install_data('resources/monogram.ttf')
 
